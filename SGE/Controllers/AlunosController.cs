@@ -346,5 +346,40 @@ namespace SGE.Controllers
         {
             return _context.Alunos.Any(e => e.AlunoId == id);
         }
+        public async Task<IActionResult> AlterarFoto(Guid id, IFormFile novaFoto)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+            Aluno aluno = await _context.Alunos.FindAsync(id);
+
+            if (novaFoto != null && novaFoto.Length > 0)
+            {
+                var fileName = aluno.AlunoId.ToString();
+                var fileExtension = Path.GetExtension(novaFoto.FileName);
+                var newFileName = fileName + fileExtension;
+                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data\\Content\\Photo", newFileName);
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await novaFoto.CopyToAsync(fileStream);
+
+                }
+                aluno.UrlFoto = newFileName;
+                _context.Alunos.Update(aluno);
+                await _context.SaveChangesAsync();
+
+                var imageBytes = await System.IO.File.ReadAllBytesAsync(filePath);
+                var imagemBase64 = Convert.ToBase64String(imageBytes);
+                ViewData["Imagem"] = imagemBase64;
+
+
+            }
+            Guid idTipo = _context.TiposUsuario.Where(a => a.Tipo == "Aluno").FirstOrDefault().TipoUsuarioId;
+
+            ViewData["TipoUsuarioId"] = idTipo;
+            return View("Edit", aluno);
+        }
     }
 }
