@@ -224,6 +224,8 @@ namespace SGE.Controllers
                     // Exibe a imagem na view
                     ViewData["Imagem"] = imageBase64;
                 }
+
+
                 ViewData["TipoUsuarioId"] = new SelectList(_context.TiposUsuario, "TipoUsuarioId", "TipoUsuarioId", aluno.TipoUsuarioId);
                 return View(aluno);
             }
